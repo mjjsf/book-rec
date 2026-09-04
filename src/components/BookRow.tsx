@@ -1,8 +1,7 @@
 "use client";
 
-import { saveShelf } from "@/lib/client";
 import { useAppState } from "./AppStateProvider";
-import { CoverArt } from "./CoverArt";
+import { BookCover } from "./BookCover";
 import { ShelfButton } from "./ShelfButton";
 import { StarRating } from "./StarRating";
 import type { Recommendation } from "@/lib/types";
@@ -24,7 +23,7 @@ export function BookRow({
   return (
     <li className="flex flex-col gap-[19px] border-b border-hairline pb-[19px] last:border-b-0">
       <div className="flex gap-[20px]">
-        <CoverArt book={book} width={70} height={105} />
+        <BookCover book={book} width={70} height={105} />
 
         <div className="flex w-[244.468px] flex-col gap-[20px]">
           <div className="flex flex-col gap-[8px]">
@@ -50,12 +49,7 @@ export function BookRow({
 
           <ShelfButton
             shelf={shelves[book.id] ?? null}
-            onChange={(next) => {
-              // Update locally first so the button responds immediately, then
-              // persist. A failed write is not worth blocking the tap on.
-              setShelf(book.id, next);
-              void saveShelf(book.id, next).catch(() => undefined);
-            }}
+            onChange={(next) => setShelf(book.id, next)}
           />
         </div>
       </div>

@@ -1,27 +1,22 @@
-import type { RecommendResponse, Shelf } from "./types";
+import { localRecommender } from "./recommender/localRecommender";
+import type { RecommendResponse } from "./types";
 
-/** Thin wrappers around the API routes, so screens don't hand-roll fetches. */
-
+/**
+ * The screens' entry point into the engine.
+ *
+ * This used to POST to /api/recommend. The site is now a static export for
+ * GitHub Pages, which has no server to POST to, so the scorer runs in the
+ * browser instead. The signature is unchanged, so the screens did not move.
+ *
+ * `claudeRecommender` is deliberately not reachable from here: it needs an API
+ * key, and a static site has nowhere to keep one that the browser cannot read.
+ * Running the live engine means running this behind a real server — see
+ * src/lib/recommender/index.ts.
+ */
 export async function requestRecommendations(input: {
   prompt: string;
   useHistory: boolean;
   previousTurns: Array<{ prompt: string; bookIds: string[] }>;
 }): Promise<RecommendResponse> {
-  const response = await fetch("/api/recommend", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!response.ok) {
-    throw new Error(`The recommendation service returned ${response.status}.`);
-  }
-  return (await response.json()) as RecommendResponse;
-}
-
-export async function saveShelf(bookId: string, shelf: Shelf | null): Promise<void> {
-  await fetch("/api/shelf", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ bookId, shelf }),
-  });
+  return localRecommender.recommend(input);
 }
