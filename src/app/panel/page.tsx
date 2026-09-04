@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AiDetailsPopover } from "@/components/AiDetailsButton";
 import { AppHeader } from "@/components/AppHeader";
 import { useAppState } from "@/components/AppStateProvider";
+import { BottomNav } from "@/components/BottomNav";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { RefineDock } from "@/components/RefineDock";
 import { ResultsList } from "@/components/ResultsList";
@@ -71,7 +72,7 @@ export default function PanelScreen() {
         </h1>
       </div>
 
-      <div className="scroll-area absolute inset-x-0 top-[229px] bottom-[325px] px-[19px]">
+      <div className="scroll-area absolute inset-x-0 top-[229px] bottom-[285px] px-[19px]">
         {pending ? (
           <Thinking />
         ) : error ? (
@@ -92,8 +93,9 @@ export default function PanelScreen() {
         onUseHistoryChange={setUseHistory}
         detailsOpen={detailsOpen}
         onDetailsToggle={setDetailsOpen}
-        navItems={5}
       />
+
+      <BottomNav items={5} />
 
       {detailsOpen ? <AiDetailsPopover onClose={() => setDetailsOpen(false)} /> : null}
     </PhoneFrame>

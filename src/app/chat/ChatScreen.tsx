@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { AiDetailsPopover } from "@/components/AiDetailsButton";
 import { AppHeader } from "@/components/AppHeader";
 import { useAppState } from "@/components/AppStateProvider";
+import { BottomNav } from "@/components/BottomNav";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { RefineDock } from "@/components/RefineDock";
 import { ResultsList } from "@/components/ResultsList";
@@ -98,7 +99,7 @@ export function ChatScreen() {
 
       <div
         ref={scroller}
-        className="scroll-area absolute inset-x-0 top-[102px] bottom-[325px] px-[16px] pt-[32px] pb-[24px]"
+        className="scroll-area absolute inset-x-0 top-[102px] bottom-[285px] px-[16px] pt-[32px] pb-[24px]"
       >
         <div className="flex flex-col gap-[32px]">
           {turns.map((turn, index) => (
@@ -143,6 +144,8 @@ export function ChatScreen() {
         detailsOpen={detailsOpen}
         onDetailsToggle={setDetailsOpen}
       />
+
+      <BottomNav />
 
       {detailsOpen ? <AiDetailsPopover onClose={() => setDetailsOpen(false)} /> : null}
     </PhoneFrame>

@@ -31,10 +31,9 @@ Each route corresponds to a frame in the Figma file.
 | `/` | `283:77` / `287:471` | **Start / Entry** — the composer, empty and filled |
 | `/chat` | `283:203` | **Recommendation** — conversation above a sticky refine dock |
 | `/panel` | `287:705` | **Panel** — proactive recommendations, no typed question |
-| `/discover` | `287:1135` | **Carousel** — the Discover feed the assistant is entered from |
 
-`/home`, `/my-books`, `/search` and `/more` are stubs so the nav bar is
-navigable; they are outside the design's scope and say so.
+`/home`, `/my-books`, `/discover`, `/search` and `/more` are stubs so the nav
+bar is navigable; they are outside the design's scope and say so.
 
 The "AI details" popover (`283:398`) and the two-state reading-history switch
 (`287:621`) are components rather than routes, and appear on every screen that
@@ -77,9 +76,10 @@ history"* keeps meaning the same thing however long from now the app runs.
   send, 17×20 shield, 25×25 sparkle), and `CoverArt` generates covers from each
   book's palette at the designed 70×105 and 79×119 boxes. Swapping in the real
   exports is confined to those two files.
-- **The Discover screen is an approximation.** That frame is a flattened
-  screenshot in Figma with two shelves drawn over it, so the surrounding feed
-  is rebuilt in code rather than traced.
+- **The bottom bar positions itself.** `BottomNav` carries its own
+  `left-16 / top-773` placement so every screen gets an identical 16px gap on
+  the left, right and below, and `.phone-frame` uses an `outline` rather than a
+  `border` so its content box stays exactly the 393×852 of the Figma frames.
 - **One state is not in the design.** A request takes time, so the rationale
   slot shows a pulse while the engine answers (`src/components/Thinking.tsx`).
 

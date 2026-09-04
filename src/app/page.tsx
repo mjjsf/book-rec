@@ -57,7 +57,7 @@ export default function StartScreen() {
         </div>
       </div>
 
-      <BottomNav className="absolute left-[16px] top-[773px]" />
+      <BottomNav />
 
       {detailsOpen ? <AiDetailsPopover onClose={() => setDetailsOpen(false)} /> : null}
     </PhoneFrame>

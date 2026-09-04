@@ -16,7 +16,7 @@ export function AppHeader({
   variant?: "sand" | "bare";
 }) {
   const router = useRouter();
-  const close = onClose ?? (() => router.push("/discover"));
+  const close = onClose ?? (() => router.push("/home"));
 
   return (
     <header

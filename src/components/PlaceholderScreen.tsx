@@ -19,7 +19,7 @@ export function PlaceholderScreen({ title }: { title: string }) {
           Back to the assistant
         </Link>
       </div>
-      <BottomNav className="absolute left-[16px] top-[773px]" />
+      <BottomNav />
     </PhoneFrame>
   );
 }

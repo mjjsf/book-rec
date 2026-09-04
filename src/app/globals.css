@@ -83,14 +83,21 @@ body {
   height: 852px;
   overflow: hidden;
   background: var(--color-white);
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  /*
+   * An outline, not a border. Preflight makes everything border-box, so a 1px
+   * border would shrink the content box to 391x850 and every absolutely
+   * positioned child — the bottom nav especially — would sit 2px off the
+   * design's coordinates. An outline paints outside the box and takes no
+   * layout space, so this stays exactly the 393x852 of the Figma frames.
+   */
+  outline: 1px solid rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 440px) {
   .phone-frame {
     width: 100vw;
     height: 100dvh;
-    border: none;
+    outline: none;
   }
 }
 
