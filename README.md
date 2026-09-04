@@ -27,6 +27,7 @@ npm run dev      # http://localhost:3000
 | `npm run preview` | Serve `out/` the way Pages does, at `/book-rec/` |
 | `npm run covers` | Regenerate cover images from `assets/covers-src/` |
 | `npm run check:static` | Fail if any server-only code crept in |
+| `npm run smoke` | Fetch a deployed build and check it actually works |
 | `npm run test` | Vitest suites for the catalog and the designed copy |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
@@ -88,6 +89,13 @@ Publishing goes through the Actions **Pages artifact** rather than a `gh-pages`
 branch or `docs/` on `main`: no build output is committed to the repository, and
 the deploy is gated behind lint, typecheck and the tests.
 
+After each deploy, `npm run smoke` fetches the published site and checks it
+actually loads — a page, its designed copy, and crucially that a referenced
+`/_next/` bundle resolves. "The artifact uploaded" is not the same claim as "the
+page works": a wrong `basePath` still serves the HTML while every asset 404s.
+The script runs against the local preview by default, so it is also useful
+before pushing.
+
 ## Cover images
 
 Real cover artwork lives in `src/covers/` as 210×315 WebP — three times the
@@ -109,16 +117,26 @@ the normal state for most of the catalog — `BookCover` picks between the two.
 Everything the design shows as a *control* works. Everything it shows as
 *content* is transcribed.
 
+The app is presented the way the published Figma prototype is
+(`scaling=scale-down&content-scaling=fixed`): the 393×852 frame inside an
+iPhone-proportioned device, scaled down as one unit to fit the window and never
+enlarged past 1×. On a phone-sized viewport the chrome comes off and the app
+uses the whole screen.
+
 **Real behaviour:**
 
-- the composer accepts typing, grows 112px → 147px once it holds text, and
-  enables Send only when it is non-empty;
+- the composer opens empty and fills with the design's question on the first
+  click — the prototype's Start → Entry beat — fading in over ~350ms and growing
+  112px → 147px;
+- Send is enabled only when the field is non-empty;
 - the reading-history switch toggles, and its state persists across navigation
   via `localStorage`;
 - "Want to Read" shelves a book, the caret opens the other shelves, and the
   choice persists;
-- the AI-details popover opens, traps focus, and closes on Escape or an outside
-  click;
+- the AI-details card opens anchored to whatever opened it — 16px below the
+  controls row on Start, and bottom-right-aligned to the refine field in the
+  dock, which is the only placement that fits inside the frame there — and
+  closes on Escape or an outside click;
 - every control has a hover state and a `focus-visible` ring for keyboard use;
 - the bottom nav navigates.
 

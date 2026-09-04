@@ -1,5 +1,6 @@
 "use client";
 
+import { AiDetailsPopover } from "./AiDetailsButton";
 import { AssistantControls } from "./AssistantControls";
 import { PromptComposer } from "./PromptComposer";
 
@@ -38,14 +39,29 @@ export function RefineDock({
         <p className="h-[18px] text-body font-medium leading-none text-black">
           Refine results:
         </p>
-        <PromptComposer
-          value={value}
-          onChange={onChange}
-          onSubmit={onSubmit}
-          label="Refine your recommendations"
-          minHeight={95}
-          maxHeight={95}
-        />
+        {/*
+          * The card is anchored to the field rather than to the controls row:
+          * the row sits at y~734, so a 218px card 16px below it would end at
+          * ~988, well past the 852px frame. Rendering it here with
+          * right-0 bottom-0 puts its bottom-right corner exactly on the
+          * field's, which needs no arithmetic to stay correct.
+          */}
+        <div className="relative">
+          <PromptComposer
+            value={value}
+            onChange={onChange}
+            onSubmit={onSubmit}
+            label="Refine your recommendations"
+            minHeight={95}
+            maxHeight={95}
+          />
+          {detailsOpen ? (
+            <AiDetailsPopover
+              onClose={() => onDetailsToggle(false)}
+              className="right-0 bottom-0"
+            />
+          ) : null}
+        </div>
         <AssistantControls
           useHistory={useHistory}
           onUseHistoryChange={onUseHistoryChange}
