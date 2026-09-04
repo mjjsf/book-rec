@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens transcribed from Figma "Book-rec-feature"
+ * file 8GNQedSx55nFDgrr9CeIe2, v4 board (frames at y=1653).
+ *
+ * Named variables come from the file's published variables
+ * (white, green/500). The rest are raw values read off the
+ * v4 frames; they are collected here so no component hardcodes a hex.
+ */
+@theme {
+  /* --- published Figma variables --- */
+  --color-white: #ffffff;
+  --color-green-500: #38a169;
+
+  /* --- surfaces --- */
+  --color-header-sand: #e6e2d4; /* 283:82 header bar */
+  --color-bubble-sand: #f7f5ef; /* 283:210 user bubble */
+  --color-chip: #f2f2f0; /* 283:122 close chip, FAB */
+  --color-nav-pill: #f2f2f2; /* 283:84 bottom nav pill */
+  --color-nav-pill-border: #fcfcfc;
+
+  /* --- lines & text --- */
+  --color-field-border: #dcdcdc; /* 283:129 composer border */
+  --color-placeholder: #b5b5b5; /* 283:130 placeholder */
+  --color-rule: #c5c5c5; /* 283:339 refine-dock top rule */
+  --color-hairline: #e3e3e3; /* 283:243 book row divider */
+  --color-byline: #0d0d0d; /* 283:220 "by <author>" */
+  --color-nav-label: #181818; /* 283:89 nav labels */
+
+  /* --- accents --- */
+  --color-shelf-green: #46aa71; /* 283:238 Want to Read */
+  --color-star: #fa604a; /* 283:236 star fill */
+
+  /* --- type --- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", Times, serif;
+
+  --text-headline: 25px; /* 283:127 */
+  --text-body: 15px; /* 283:212 rationale */
+  --text-control: 14px; /* 283:130, 287:601 */
+  --text-title: 15.682px; /* 283:219 book title */
+  --text-meta: 12.063px; /* 283:220, 283:237 */
+  --text-nav: 10px; /* 283:89 */
+
+  /* --- radii --- */
+  --radius-composer: 8px; /* 283:129 */
+  --radius-bubble: 16px; /* 283:210 */
+  --radius-chip: 22.5px; /* 283:122 */
+  --radius-pill: 50px; /* 283:84 */
+  --radius-shelf: 2.413px; /* 283:238 */
+
+  /* --- shadows --- */
+  --shadow-nav: 0 5px 12.5px rgba(0, 0, 0, 0.1);
+  --shadow-chip: 0 0 10px rgba(0, 0, 0, 0.1);
+  --shadow-fab: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #dedede;
+  color: #000;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The Figma frames are all 393x852. The phone frame reproduces that
+ * viewport on a desktop browser and gets out of the way on a real phone.
+ */
+.phone-frame {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  overflow: hidden;
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 440px) {
+  .phone-frame {
+    width: 100vw;
+    height: 100dvh;
+    border: none;
+  }
+}
+
+/* Native-feeling scroll areas without visible desktop scrollbars. */
+.scroll-area {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes thinking-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.thinking-dot {
+  animation: thinking-pulse 1.2s infinite ease-in-out;
+}
