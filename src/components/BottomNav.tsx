@@ -7,7 +7,6 @@ import {
   HomeIcon,
   MoreIcon,
   MyBooksIcon,
-  SearchIcon,
   SparkleIcon,
 } from "./icons";
 
@@ -21,7 +20,6 @@ const ITEMS = [
   { href: "/home", label: "Home", Icon: HomeIcon },
   { href: "/my-books", label: "My Books", Icon: MyBooksIcon },
   { href: "/discover", label: "Discover", Icon: DiscoverIcon },
-  { href: "/search", label: "Search", Icon: SearchIcon },
   { href: "/more", label: "More", Icon: MoreIcon },
 ] as const;
 
@@ -33,9 +31,8 @@ const ITEMS = [
  * placement here rather than at each call site is what stops the screens
  * drifting apart from one another.
  */
-export function BottomNav({ items = 4 }: { items?: 4 | 5 }) {
+export function BottomNav() {
   const pathname = usePathname();
-  const shown = items === 5 ? ITEMS : ITEMS.filter((i) => i.label !== "Search");
 
   return (
     <nav
@@ -47,16 +44,14 @@ export function BottomNav({ items = 4 }: { items?: 4 | 5 }) {
         // exactly 63px (283:84), the same as the FAB, and letting the 1px
         // border and the label's line-height push it to 68 is what threw the
         // bar's bottom gap out of line with its left and right ones.
-        className={`flex h-[63px] w-[288px] items-center justify-center rounded-pill border border-nav-pill-border bg-nav-pill px-[24px] shadow-nav ${
-          items === 5 ? "gap-[14px]" : "gap-[31px]"
-        }`}
+        className="flex h-[63px] w-[288px] items-center justify-center gap-[31px] rounded-pill border border-nav-pill-border bg-nav-pill px-[24px] shadow-nav"
       >
-        {shown.map(({ href, label, Icon }) => (
+        {ITEMS.map(({ href, label, Icon }) => (
           <Link
             key={label}
             href={href}
             aria-current={pathname === href ? "page" : undefined}
-            className="flex flex-col items-center justify-center gap-[8px] text-nav-label"
+            className="ring-focus flex flex-col items-center justify-center gap-[8px] rounded-[8px] px-[4px] py-[2px] text-nav-label transition-colors hover:text-green-500 aria-[current=page]:text-green-500"
           >
             <Icon />
             <span className="whitespace-nowrap text-nav font-medium leading-none">{label}</span>
@@ -67,7 +62,7 @@ export function BottomNav({ items = 4 }: { items?: 4 | 5 }) {
       <Link
         href="/"
         aria-label="Ask the book assistant"
-        className="flex size-[63px] shrink-0 items-center justify-center rounded-pill border border-white bg-nav-pill text-nav-label shadow-fab transition-transform active:scale-95"
+        className="ring-focus flex size-[63px] shrink-0 items-center justify-center rounded-pill border border-white bg-nav-pill text-nav-label shadow-fab transition hover:bg-chip hover:text-green-500 active:scale-95"
       >
         <SparkleIcon />
       </Link>

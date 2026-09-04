@@ -1,25 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import type { ChatTurn, Shelf } from "@/lib/types";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { Shelf } from "@/lib/types";
 
 /**
- * Session state shared across the screens: the conversation, the shelf, and
- * the "Use my reading history" toggle. The toggle and the shelf appear on
- * several screens in the design, so they have to survive navigation.
+ * The bits of state the prototype actually keeps: which books are shelved and
+ * whether "Use my reading history" is on. Both appear on more than one screen
+ * in the design, so they have to survive navigation.
+ *
+ * There is no conversation state — the results screen renders the designed
+ * content, not a history of turns.
  */
 interface AppState {
-  turns: ChatTurn[];
-  addTurn: (turn: ChatTurn) => void;
-  resetTurns: () => void;
-
   shelves: Record<string, Shelf>;
   setShelf: (bookId: string, shelf: Shelf | null) => void;
 
@@ -37,7 +29,6 @@ interface Persisted {
 }
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [shelves, setShelves] = useState<Record<string, Shelf>>({});
   // The design ships the switch on by default (287:603 "Property 1=Default").
   const [useHistory, setUseHistory] = useState(true);
@@ -64,12 +55,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     }
   }, [shelves, useHistory]);
 
-  const addTurn = useCallback((turn: ChatTurn) => {
-    setTurns((current) => [...current, turn]);
-  }, []);
-
-  const resetTurns = useCallback(() => setTurns([]), []);
-
   const setShelf = useCallback((bookId: string, shelf: Shelf | null) => {
     setShelves((current) => {
       const next = { ...current };
@@ -80,8 +65,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AppState>(
-    () => ({ turns, addTurn, resetTurns, shelves, setShelf, useHistory, setUseHistory }),
-    [turns, addTurn, resetTurns, shelves, setShelf, useHistory],
+    () => ({ shelves, setShelf, useHistory, setUseHistory }),
+    [shelves, setShelf, useHistory],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

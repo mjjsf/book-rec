@@ -21,11 +21,13 @@ export function HistorySwitch({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex items-center gap-[8px] text-left"
+      className="ring-focus group flex cursor-pointer items-center gap-[8px] rounded-[6px] text-left"
     >
       <span
         className={`relative block h-[20px] w-[34px] shrink-0 rounded-full transition-colors ${
-          checked ? "bg-green-500" : "bg-[#cbd5d1]"
+          checked
+            ? "bg-green-500 group-hover:bg-[#2f8c58]"
+            : "bg-[#cbd5d1] group-hover:bg-[#b4c1bd]"
         }`}
       >
         <span

@@ -19,7 +19,6 @@ export function RefineDock({
   value,
   onChange,
   onSubmit,
-  pending,
   useHistory,
   onUseHistoryChange,
   detailsOpen,
@@ -28,7 +27,6 @@ export function RefineDock({
   value: string;
   onChange: (next: string) => void;
   onSubmit: () => void;
-  pending: boolean;
   useHistory: boolean;
   onUseHistoryChange: (next: boolean) => void;
   detailsOpen: boolean;
@@ -44,7 +42,6 @@ export function RefineDock({
           value={value}
           onChange={onChange}
           onSubmit={onSubmit}
-          disabled={pending}
           label="Refine your recommendations"
           minHeight={95}
           maxHeight={95}

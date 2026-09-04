@@ -4,20 +4,13 @@ import { useAppState } from "./AppStateProvider";
 import { BookCover } from "./BookCover";
 import { ShelfButton } from "./ShelfButton";
 import { StarRating } from "./StarRating";
-import type { Recommendation } from "@/lib/types";
+import type { Book } from "@/lib/types";
 
 /**
  * One result row (283:214): a 70 x 105 cover, then title / byline / rating
  * strip / shelf button in a 244.47px column, with a hairline underneath.
  */
-export function BookRow({
-  recommendation,
-  showReason = false,
-}: {
-  recommendation: Recommendation;
-  showReason?: boolean;
-}) {
-  const { book } = recommendation;
+export function BookRow({ book }: { book: Book }) {
   const { shelves, setShelf } = useAppState();
 
   return (
@@ -36,15 +29,6 @@ export function BookRow({
                 {book.year}
               </p>
             </div>
-            {showReason ? (
-              <p className="text-meta leading-[16px] text-byline/70">
-                {recommendation.signals
-                  .filter((s) => s.kind !== "rating")
-                  .slice(0, 2)
-                  .map((s) => s.detail)
-                  .join(" · ")}
-              </p>
-            ) : null}
           </div>
 
           <ShelfButton
