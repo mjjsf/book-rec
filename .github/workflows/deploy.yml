@@ -1,0 +1,70 @@
+name: CI and GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Allow one deploy at a time, and let a newer push supersede a queued one
+# rather than cancelling a deploy that is already running.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      # Static hosting cannot hold a secret, so the Claude engine must not be
+      # reachable from the browser bundle. Fail the build if it ever is.
+      - name: Assert no API-key path in the client bundle
+        run: |
+          if grep -rlE 'ANTHROPIC_API_KEY|api\.anthropic\.com' out/ ; then
+            echo "::error::The Anthropic code path reached the static bundle."
+            exit 1
+          fi
+          echo "Client bundle is clean."
+
+      - name: Assert Jekyll is disabled
+        run: test -f out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        # Only the run that can deploy needs to publish the artifact.
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          path: out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4
