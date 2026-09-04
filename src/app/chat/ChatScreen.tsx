@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { AiDetailsPopover } from "@/components/AiDetailsButton";
+import { Suspense, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { useAppState } from "@/components/AppStateProvider";
 import { BottomNav } from "@/components/BottomNav";
@@ -10,6 +8,7 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { RefineDock } from "@/components/RefineDock";
 import { ResultsList } from "@/components/ResultsList";
 import { RATIONALE, SAMPLE_QUERY, getResultBooks } from "@/lib/designContent";
+import { Bubble, QuestionBubble } from "./QuestionBubble";
 
 /**
  * Recommendation (283:203).
@@ -20,9 +19,6 @@ import { RATIONALE, SAMPLE_QUERY, getResultBooks } from "@/lib/designContent";
  * narrow it — the Figma has one result state and this is it.
  */
 export function ChatScreen() {
-  const params = useSearchParams();
-  const question = params.get("q") ?? SAMPLE_QUERY;
-
   const { useHistory, setUseHistory } = useAppState();
   const [refinement, setRefinement] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -35,11 +31,14 @@ export function ChatScreen() {
 
       <div className="scroll-area absolute inset-x-0 top-[102px] bottom-[285px] px-[16px] pt-[32px] pb-[24px]">
         <div className="flex flex-col gap-[32px]">
-          <div className="flex justify-end">
-            <div className="max-w-[308px] rounded-bubble bg-bubble-sand p-[16px]">
-              <p className="text-control leading-[1.35] text-black">{question}</p>
-            </div>
-          </div>
+          {/*
+            * Only the bubble reads ?q=, so only the bubble sits behind a
+            * Suspense boundary. The fallback is the designed question, so the
+            * prerendered HTML is already right.
+            */}
+          <Suspense fallback={<Bubble text={SAMPLE_QUERY} />}>
+            <QuestionBubble />
+          </Suspense>
 
           <p className="whitespace-pre-line text-body leading-[1.32] text-black">
             {RATIONALE}
@@ -60,8 +59,6 @@ export function ChatScreen() {
       />
 
       <BottomNav />
-
-      {detailsOpen ? <AiDetailsPopover onClose={() => setDetailsOpen(false)} /> : null}
     </PhoneFrame>
   );
 }

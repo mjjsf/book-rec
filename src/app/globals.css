@@ -67,15 +67,78 @@ body {
 
 body {
   margin: 0;
-  background: #dedede;
+  background: radial-gradient(circle at 50% 20%, #f2f2f0 0%, #d7d7d4 100%);
+  background-attachment: fixed;
   color: #000;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 /*
- * The Figma frames are all 393x852. The phone frame reproduces that
- * viewport on a desktop browser and gets out of the way on a real phone.
+ * The device shell around the screen. 393x852 is an iPhone 14/15 Pro, so the
+ * proportions follow that: a 12px bezel, a 55px outer radius against a 47px
+ * screen radius, and side buttons as plain elements — no images.
+ *
+ * Deliberately no Dynamic Island: the design's sand header (283:82) occupies
+ * the top of the frame and an island would sit on top of it, which the Figma
+ * frame does not account for.
+ *
+ * PhoneFrame.tsx sets the transform; keep --bezel in step with BEZEL there.
+ */
+.device {
+  --bezel: 12px;
+  position: relative;
+  padding: var(--bezel);
+  border-radius: 55px;
+  background: linear-gradient(155deg, #3b3b3f 0%, #17171a 45%, #2a2a2e 100%);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.18) inset,
+    0 24px 60px rgba(0, 0, 0, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  /* Origin is set inline by PhoneFrame; see the note there. */
+}
+
+/* Volume pair and wake button. */
+.device::before,
+.device::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: #2c2c30;
+}
+.device::before {
+  left: -3px;
+  top: 150px;
+  height: 108px;
+  box-shadow: 0 -66px 0 #2c2c30;
+}
+.device::after {
+  right: -3px;
+  top: 190px;
+  height: 92px;
+}
+
+/*
+ * The home indicator. It sits over the app's own bottom nav, so it must never
+ * take a click — the nav is 16px from the bottom and genuinely interactive.
+ */
+.device-indicator {
+  position: absolute;
+  bottom: calc(var(--bezel) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+/*
+ * The Figma frames are all 393x852. The screen keeps exactly that content box
+ * — every absolute coordinate in the app is measured against it — and only the
+ * corners are rounded to sit inside the bezel.
  */
 .phone-frame {
   position: relative;
@@ -83,22 +146,35 @@ body {
   height: 852px;
   overflow: hidden;
   background: var(--color-white);
-  /*
-   * An outline, not a border. Preflight makes everything border-box, so a 1px
-   * border would shrink the content box to 391x850 and every absolutely
-   * positioned child — the bottom nav especially — would sit 2px off the
-   * design's coordinates. An outline paints outside the box and takes no
-   * layout space, so this stays exactly the 393x852 of the Figma frames.
-   */
-  outline: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 43px;
 }
 
+/*
+ * On a real phone the viewport is already the device, so the chrome comes off
+ * and the app uses the whole screen.
+ */
 @media (max-width: 440px) {
   .phone-frame {
     width: 100vw;
     height: 100dvh;
-    outline: none;
+    border-radius: 0;
   }
+}
+
+/*
+ * Used for the prototype's fill-on-click beat and the AI-details card. Short
+ * enough to read as a transition rather than a wait.
+ */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 350ms ease-out;
 }
 
 /* Native-feeling scroll areas without visible desktop scrollbars. */

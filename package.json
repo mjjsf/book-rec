@@ -10,7 +10,8 @@
     "test": "vitest run",
     "covers": "node scripts/prepare-covers.mjs",
     "preview": "node scripts/preview.mjs",
-    "check:static": "node scripts/assert-static.mjs"
+    "check:static": "node scripts/assert-static.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "next": "^15.5.25",

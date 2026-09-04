@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { AiDetailsPopover } from "@/components/AiDetailsButton";
+import { useRef, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { AssistantControls } from "@/components/AssistantControls";
 import { useAppState } from "@/components/AppStateProvider";
@@ -14,19 +13,34 @@ import { SAMPLE_QUERY } from "@/lib/designContent";
 /**
  * Start (283:77) and Entry (287:471) — the same screen in two states.
  *
- * The composer opens preloaded with the design's own question, which is exactly
- * the Entry frame; clearing the field gives the empty Start frame with its
- * placeholder. Both designed states are reachable without inventing any UI the
- * Figma does not have.
+ * It opens empty — the Start frame — and clicking the input fills it with the
+ * design's own question, which is the Entry frame. That is the prototype's
+ * transition between the two, so the app plays it rather than skipping to the
+ * filled state.
  *
- * The composer grows from 112px to 147px once it holds text, as the two frames
- * show, and Send always leads to the results screen.
+ * The text fades in over ~350ms, and the composer grows 112px to 147px, as the
+ * two frames show. Send always leads to the results screen.
  */
 export default function StartScreen() {
   const router = useRouter();
   const { useHistory, setUseHistory } = useAppState();
-  const [prompt, setPrompt] = useState(SAMPLE_QUERY);
+  const [prompt, setPrompt] = useState("");
+  const [fadeIn, setFadeIn] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const populated = useRef(false);
+
+  /**
+   * Fill on the first click, once. Refilling every time the field is emptied
+   * would make it impossible to type anything of your own, so the beat plays
+   * once and the field is ordinary afterwards.
+   */
+  const populateOnce = () => {
+    if (populated.current) return;
+    populated.current = true;
+    setPrompt(SAMPLE_QUERY);
+    setFadeIn(true);
+    window.setTimeout(() => setFadeIn(false), 400);
+  };
 
   const submit = () => {
     const trimmed = prompt.trim();
@@ -50,6 +64,8 @@ export default function StartScreen() {
             value={prompt}
             onChange={setPrompt}
             onSubmit={submit}
+            onFirstFocus={populateOnce}
+            fadeIn={fadeIn}
             label="Describe the book you are looking for"
             minHeight={prompt.length > 0 ? 147 : 112}
             maxHeight={147}
@@ -59,13 +75,13 @@ export default function StartScreen() {
             onUseHistoryChange={setUseHistory}
             detailsOpen={detailsOpen}
             onDetailsToggle={setDetailsOpen}
+            // Top pinned 16px under the row, right edges aligned.
+            popoverPlacement="right-0 top-[calc(100%+16px)]"
           />
         </div>
       </div>
 
       <BottomNav />
-
-      {detailsOpen ? <AiDetailsPopover onClose={() => setDetailsOpen(false)} /> : null}
     </PhoneFrame>
   );
 }
