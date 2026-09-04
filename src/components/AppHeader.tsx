@@ -28,7 +28,7 @@ export function AppHeader({
         type="button"
         onClick={close}
         aria-label="Close the assistant"
-        className="absolute right-[13px] top-[46px] flex size-[45px] items-center justify-center rounded-chip border border-white bg-chip text-black shadow-chip transition-transform active:scale-95"
+        className="ring-focus absolute right-[13px] top-[46px] flex size-[45px] items-center justify-center rounded-chip border border-white bg-chip text-black shadow-chip transition hover:bg-nav-pill hover:shadow-fab active:scale-95"
       >
         <CloseIcon />
       </button>

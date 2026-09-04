@@ -29,17 +29,12 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
 
-      # Static hosting cannot hold a secret, so the Claude engine must not be
-      # reachable from the browser bundle. Fail the build if it ever is.
-      - name: Assert no API-key path in the client bundle
-        run: |
-          if grep -rlE 'ANTHROPIC_API_KEY|api\.anthropic\.com' out/ ; then
-            echo "::error::The Anthropic code path reached the static bundle."
-            exit 1
-          fi
-          echo "Client bundle is clean."
+      # Catch server-only code before the build does, with a message that
+      # explains the deployment choice rather than just the mechanism.
+      - run: npm run check:static
+
+      - run: npm run build
 
       - name: Assert Jekyll is disabled
         run: test -f out/.nojekyll

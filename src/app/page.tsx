@@ -9,22 +9,28 @@ import { useAppState } from "@/components/AppStateProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { PromptComposer } from "@/components/PromptComposer";
+import { SAMPLE_QUERY } from "@/lib/designContent";
 
 /**
- * Start (283:77) and Entry (287:471) are the same screen in two states: the
- * composer sits at 112px empty and grows to 147px once there is text, and the
- * headline stays centred above it. Submitting hands off to /chat.
+ * Start (283:77) and Entry (287:471) — the same screen in two states.
+ *
+ * The composer opens preloaded with the design's own question, which is exactly
+ * the Entry frame; clearing the field gives the empty Start frame with its
+ * placeholder. Both designed states are reachable without inventing any UI the
+ * Figma does not have.
+ *
+ * The composer grows from 112px to 147px once it holds text, as the two frames
+ * show, and Send always leads to the results screen.
  */
 export default function StartScreen() {
   const router = useRouter();
-  const { useHistory, setUseHistory, resetTurns } = useAppState();
-  const [prompt, setPrompt] = useState("");
+  const { useHistory, setUseHistory } = useAppState();
+  const [prompt, setPrompt] = useState(SAMPLE_QUERY);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const submit = () => {
     const trimmed = prompt.trim();
     if (trimmed.length === 0) return;
-    resetTurns();
     router.push(`/chat?q=${encodeURIComponent(trimmed)}`);
   };
 

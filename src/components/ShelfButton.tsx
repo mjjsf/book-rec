@@ -38,15 +38,15 @@ export function ShelfButton({
   return (
     <div ref={wrapper} className="relative">
       <div
-        className={`flex h-[27.745px] w-[120.629px] items-center rounded-shelf pl-[6px] pr-[11px] ${
-          shelf ? "bg-shelf-green" : "bg-shelf-green/85"
+        className={`flex h-[27.745px] w-[120.629px] items-center rounded-shelf pl-[6px] pr-[11px] transition-colors ${
+          shelf ? "bg-shelf-green hover:bg-[#3d9663]" : "bg-shelf-green/85 hover:bg-shelf-green"
         }`}
       >
         <button
           type="button"
           onClick={() => onChange(shelf ? null : "want-to-read")}
           aria-pressed={shelf !== null}
-          className="whitespace-nowrap text-left text-meta font-semibold tracking-[-0.1206px] text-white"
+          className="ring-focus cursor-pointer whitespace-nowrap rounded-[3px] text-left text-meta font-semibold tracking-[-0.1206px] text-white"
         >
           {label}
         </button>
@@ -56,7 +56,7 @@ export function ShelfButton({
           onClick={() => setOpen((v) => !v)}
           aria-label="Choose a shelf"
           aria-expanded={open}
-          className="flex size-[12px] items-center justify-center text-white"
+          className="ring-focus flex size-[12px] cursor-pointer items-center justify-center rounded-[3px] text-white transition-transform hover:scale-125"
         >
           <CaretIcon />
         </button>
@@ -72,7 +72,7 @@ export function ShelfButton({
                   onChange(value);
                   setOpen(false);
                 }}
-                className={`block w-full px-[10px] py-[7px] text-left hover:bg-bubble-sand ${
+                className={`ring-focus block w-full cursor-pointer px-[10px] py-[7px] text-left transition-colors hover:bg-bubble-sand ${
                   shelf === value ? "font-semibold" : ""
                 }`}
               >
@@ -88,7 +88,7 @@ export function ShelfButton({
                   onChange(null);
                   setOpen(false);
                 }}
-                className="block w-full border-t border-field-border px-[10px] py-[7px] text-left hover:bg-bubble-sand"
+                className="ring-focus block w-full cursor-pointer border-t border-field-border px-[10px] py-[7px] text-left transition-colors hover:bg-bubble-sand"
               >
                 Remove from shelf
               </button>

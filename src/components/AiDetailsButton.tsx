@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { AI_DETAILS } from "@/lib/designContent";
 import { ShieldInfoIcon } from "./icons";
 
 /**
@@ -19,7 +20,7 @@ export function AiDetailsButton({
       type="button"
       onClick={() => onToggle(!open)}
       aria-expanded={open}
-      className="flex items-center gap-[6px] text-black"
+      className="ring-focus flex cursor-pointer items-center gap-[6px] rounded-[6px] text-black transition-colors hover:text-green-500"
     >
       <ShieldInfoIcon />
       <span className="text-control leading-none">AI details</span>
@@ -56,17 +57,14 @@ export function AiDetailsPopover({ onClose }: { onClose: () => void }) {
         className="relative w-[319px] rounded-composer border border-field-border bg-white p-[16px] text-control leading-[1.35] shadow-fab outline-none"
       >
         <p className="mb-[14px]">
-          <strong className="font-semibold">“Use my reading history” option</strong>
+          <strong className="font-semibold">{AI_DETAILS.historyHeading}</strong>
           <br />
-          Activating this option will make your reading history, and any related ratings
-          and reviews, available to the AI chatbot for consideration when making
-          recommendations.
+          {AI_DETAILS.historyBody}
         </p>
         <p>
-          <strong className="font-semibold">Privacy</strong>
+          <strong className="font-semibold">{AI_DETAILS.privacyHeading}</strong>
           <br />
-          This AI chatbot does not save or use any personally identifying information,
-          and is designed only for book recommendation.
+          {AI_DETAILS.privacyBody}
         </p>
       </div>
     </div>

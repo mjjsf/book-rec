@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { COMPOSER_PLACEHOLDER } from "@/lib/designContent";
 import { SendIcon } from "./icons";
 
 /**
@@ -17,7 +18,7 @@ export function PromptComposer({
   disabled = false,
   minHeight = 112,
   maxHeight = 147,
-  placeholder = "Describe emotion, genre, subject...",
+  placeholder = COMPOSER_PLACEHOLDER,
   label,
   autoFocus = false,
 }: {
@@ -71,8 +72,10 @@ export function PromptComposer({
           onClick={onSubmit}
           disabled={!canSend}
           aria-label="Send"
-          className={`flex size-[20px] items-center justify-center transition-opacity ${
-            canSend ? "text-black opacity-100" : "text-placeholder opacity-70"
+          className={`ring-focus flex size-[20px] items-center justify-center transition ${
+            canSend
+              ? "cursor-pointer text-black opacity-100 hover:text-green-500 active:scale-90"
+              : "cursor-not-allowed text-placeholder opacity-70"
           }`}
         >
           <SendIcon />
