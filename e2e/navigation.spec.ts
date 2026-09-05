@@ -271,15 +271,53 @@ test.describe("bottom nav", () => {
   });
 
   /**
+   * The designed gap between the four pairs is 31px, and `gap-[31px]` on the
+   * pill has always said so — but each item also carried `px-[4px]`, so what
+   * you could actually measure between them was 4 + 31 + 4.
+   *
+   * Measured between the *label* boxes, which are the visible edges of each
+   * pair: every label is wider than the icon above it, so the label's edge is
+   * where the pair visibly ends. Measuring the item boxes instead would restate
+   * the CSS token and would have passed happily at 39px.
+   */
+  test("the four pairs sit 31px apart, centred in the pill", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+    await page.evaluate(() => document.fonts.ready.then(() => true));
+
+    const measured = await page.locator('[data-testid="bottom-nav"]').evaluate((bar) => {
+      const pill = bar.firstElementChild!;
+      const box = pill.getBoundingClientRect();
+      const labels = [...pill.children].map((item) =>
+        item.querySelector("span")!.getBoundingClientRect(),
+      );
+      return {
+        gaps: labels.slice(0, -1).map((label, index) => labels[index + 1]!.left - label.right),
+        left: labels[0]!.left - box.left,
+        right: box.right - labels[labels.length - 1]!.right,
+      };
+    });
+
+    for (const [index, gap] of measured.gaps.entries()) {
+      expect(gap, `gap ${index + 1} of 3`).toBeCloseTo(31, 1);
+    }
+    expect(
+      measured.left,
+      `the row is off-centre: ${measured.left.toFixed(2)}px left vs ${measured.right.toFixed(2)}px right`,
+    ).toBeCloseTo(measured.right, 1);
+  });
+
+  /**
    * The pill is pinned to 288x63 (BottomNav.tsx), so an icon wider than the one
    * it replaces pushes its siblings out rather than growing the bar — invisible
    * to the 16/16/16 framing assertion, which only measures the outer box.
    *
-   * The bound is the pill's border box, not its padding box: the four items
-   * already span 267px inside a 240px padding box, so `px-[24px]` is inert and
-   * `justify-center` centres the row across the full 288px. That is the design
-   * as drawn; what would actually break is an item crossing the rounded edge.
-   * Today there is ~10px of headroom on each side.
+   * The bound is the pill's border box, not its padding box. The row is 235px
+   * inside a 240px padding box, so it does now fit — but with ~2.4px to spare,
+   * which is thin enough that a platform with slightly wider label metrics
+   * would trip a padding-box assertion while still looking right. What would
+   * actually break is an item crossing the rounded edge, and there is ~26px of
+   * headroom to that on each side.
    */
   test("every icon renders and nothing overflows the pill", async ({ page, notFound }) => {
     void notFound;
