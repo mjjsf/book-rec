@@ -89,7 +89,6 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
         }}
       >
         <div className="phone-frame">{children}</div>
-        <span className="device-indicator" aria-hidden="true" />
       </div>
     </div>
   );
