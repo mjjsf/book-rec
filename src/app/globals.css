@@ -58,6 +58,9 @@
 
 :root {
   color-scheme: light;
+
+  /* Every transition in the prototype runs at this one duration. */
+  --motion: 300ms;
 }
 
 html,
@@ -162,6 +165,71 @@ body {
 }
 
 /*
+ * Baseline-to-cap-height spacing for the book descriptor lines.
+ *
+ * A flex `gap` measures box to box, and a line box carries half-leading above
+ * the cap and a descender below the baseline, so an 8px gap is nowhere near 8px
+ * of visible space. These classes pull the box edges onto the typographic ones
+ * with negative margins derived from the font's own metrics, so a plain 8px gap
+ * *is* baseline-to-cap.
+ *
+ * The ratios are measured, not remembered: canvas `measureText` at 1000px
+ * against the fonts as this app loads them. `em` keeps the arithmetic valid at
+ * any font-size.
+ *
+ *   half-leading = (line-height - (ascent + descent)) / 2
+ *   baseline from box top = half-leading + ascent
+ *   cap top from box top  = baseline - cap-height
+ */
+/*
+ * The intermediates must live on the element itself, not on the group: `1em`
+ * resolves against the element's own font-size, and the ratios below are set
+ * per element too. Declaring them on the parent silently produced an invalid
+ * calc and no trim at all.
+ */
+.trim-both,
+.trim-bottom {
+  --trim-half-leading: calc(
+    (var(--trim-lh) - (var(--trim-asc) + var(--trim-desc)) * 1em) / 2
+  );
+  --trim-baseline: calc(var(--trim-half-leading) + var(--trim-asc) * 1em);
+}
+
+/* Box top -> cap height, box bottom -> baseline. */
+.trim-both {
+  margin-top: calc(0px - (var(--trim-baseline) - var(--trim-cap) * 1em));
+  margin-bottom: calc(0px - (var(--trim-lh) - var(--trim-baseline)));
+}
+
+/*
+ * Bottom only, for the title. Trimming its top too would lift the whole block
+ * relative to the cover, and only the spacing between the lines was in scope.
+ * It also keeps the serif's cap height out of the arithmetic, which matters:
+ * the serif is a system font and its cap varies by platform.
+ */
+.trim-bottom {
+  margin-bottom: calc(0px - (var(--trim-lh) - var(--trim-baseline)));
+}
+
+/*
+ * Measured ratios — canvas `measureText` at 1000px against the fonts as this
+ * app loads them, not remembered numbers. Inter is self-hosted through
+ * next/font so these hold everywhere. The serif is Georgia where installed and
+ * something Times-like where not; its ascent is pinned to Georgia's so the
+ * title's baseline lands in the same place either way.
+ */
+.trim-sans {
+  --trim-cap: 0.73438;
+  --trim-asc: 0.969;
+  --trim-desc: 0.241;
+}
+.trim-serif {
+  --trim-cap: 0.6929;
+  --trim-asc: 0.917;
+  --trim-desc: 0.219;
+}
+
+/*
  * Used for the prototype's fill-on-click beat and the AI-details card. Short
  * enough to read as a transition rather than a wait.
  */
@@ -174,16 +242,7 @@ body {
   }
 }
 .animate-fade-in {
-  animation: fade-in 350ms ease-out;
-}
-
-/*
- * The composer's fill-on-click beat, deliberately slower than the card above:
- * 350ms x 1.75 = 612.5, rounded. Kept as its own class so changing one does not
- * silently change the other.
- */
-.animate-fade-in-slow {
-  animation: fade-in 613ms ease-out;
+  animation: fade-in var(--motion) ease-out;
 }
 
 /*
@@ -192,12 +251,11 @@ body {
  * in the layout and is never remounted — does not move at all.
  */
 .screen-enter {
-  animation: fade-in 250ms ease-out;
+  animation: fade-in var(--motion) ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
-  .animate-fade-in-slow,
   .screen-enter {
     animation: none;
   }

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { AppStateProvider } from "@/components/AppStateProvider";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/BottomNav";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import "./globals.css";
 
@@ -38,7 +40,19 @@ export default function RootLayout({
             * jump you saw on submit.
             */}
           <div className="flex min-h-dvh items-center justify-center">
-            <PhoneFrame>{children}</PhoneFrame>
+            <PhoneFrame>
+              {/*
+                * The header and the nav live here rather than in the screens.
+                * They are identical on both, and inside a screen they sat in
+                * the template that remounts on navigation — so the sand bar and
+                * the whole nav vanished with the body and faded back in, which
+                * is the white flash. Painted continuously from here, only the
+                * body between them cross-fades.
+                */}
+              <AppHeader />
+              {children}
+              <BottomNav />
+            </PhoneFrame>
           </div>
         </AppStateProvider>
       </body>

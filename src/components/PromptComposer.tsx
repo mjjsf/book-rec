@@ -67,7 +67,7 @@ export function PromptComposer({
        * 147px box and clip the last line of the six-line question — the same
        * trap .phone-frame hit. Figma's stroke does not consume layout either.
        */
-      className="flex w-full flex-col rounded-composer bg-white shadow-[inset_0_0_0_1px_var(--color-field-border)] pt-[16px] pr-[10px] pb-[8px] pl-[16px] transition-[min-height]"
+      className="flex w-full flex-col rounded-composer bg-white shadow-[inset_0_0_0_1px_var(--color-field-border)] pt-[16px] pr-[10px] pb-[8px] pl-[16px] transition-[min-height] duration-300 ease-out"
       style={{ minHeight }}
     >
       <textarea
@@ -90,7 +90,7 @@ export function PromptComposer({
           }
         }}
         className={`w-full flex-1 resize-none border-0 bg-transparent pr-[6px] text-control leading-[17px] text-black outline-none placeholder:text-placeholder disabled:opacity-60 ${
-          fadeIn ? "animate-fade-in-slow" : ""
+          fadeIn ? "animate-fade-in" : ""
         }`}
         rows={1}
       />

@@ -71,4 +71,36 @@ test.describe("AI details card", () => {
     await page.mouse.click(frame.x + 180, frame.y + 180);
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
+
+  /**
+   * Clicking the trigger while the card was open used to look like nothing
+   * happened: the document `mousedown` closed it and the trigger's own `click`
+   * reopened it inside the same gesture. So this asserts it *stays* closed,
+   * which is the part that failed.
+   */
+  test("the trigger closes the card as well as opening it", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+
+    const trigger = page.getByRole("button", { name: /AI details/ });
+    await trigger.click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+
+    await trigger.click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page.waitForTimeout(200);
+    await expect(page.getByRole("dialog"), "it reopened within the gesture").toHaveCount(0);
+  });
+
+  test("the trigger does not change colour on hover", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+
+    const trigger = page.getByRole("button", { name: /AI details/ });
+    const colour = () => trigger.evaluate((el) => getComputedStyle(el).color);
+    const resting = await colour();
+    await trigger.hover();
+    await page.waitForTimeout(120);
+    expect(await colour(), "the green hover should be gone").toBe(resting);
+  });
 });

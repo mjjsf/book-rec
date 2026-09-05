@@ -1,9 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { useAppState } from "@/components/AppStateProvider";
-import { BottomNav } from "@/components/BottomNav";
 import { RefineDock } from "@/components/RefineDock";
 import { ResultsList } from "@/components/ResultsList";
 import { RATIONALE, SAMPLE_QUERY, getResultBooks } from "@/lib/designContent";
@@ -26,8 +24,6 @@ export function ChatScreen() {
 
   return (
     <>
-      <AppHeader />
-
       <div className="scroll-area absolute inset-x-0 top-[102px] bottom-[285px] px-[16px] pt-[32px] pb-[24px]">
         <div className="flex flex-col gap-[32px]">
           {/*
@@ -57,7 +53,6 @@ export function ChatScreen() {
         onDetailsToggle={setDetailsOpen}
       />
 
-      <BottomNav />
     </>
   );
 }
