@@ -44,7 +44,11 @@ export function BottomNav() {
         {ITEMS.map(({ label, Icon }) => (
           <span
             key={label}
-            className="flex flex-col items-center justify-center gap-[8px] px-[4px] py-[2px] text-nav-label"
+            // No horizontal padding: the pill's gap-[31px] is the designed
+            // distance between pairs, and 4px a side on top of it rendered as
+            // 39px. Each item's box is its label's width — every label is wider
+            // than the icon above it — so the gap you set is the gap you see.
+            className="flex flex-col items-center justify-center gap-[8px] py-[2px] text-nav-label"
           >
             <Icon />
             <span className="whitespace-nowrap text-nav font-medium leading-none">{label}</span>
