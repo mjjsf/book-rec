@@ -231,6 +231,82 @@ test.describe("bottom nav", () => {
     });
   }
 
+  /**
+   * The icons are inline SVGs drawing with `currentColor`, so they take
+   * --color-nav-label from the span that also holds the label. Swap an icon and
+   * miss that conversion and it still renders — just in whatever colour its own
+   * markup carried — which nothing else in the suite would notice.
+   */
+  test("each icon takes its colour from the label beside it", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+
+    const mismatched = await page.locator('[data-testid="bottom-nav"]').evaluate((bar) =>
+      [...bar.querySelectorAll("svg")].flatMap((icon) => {
+        const item = icon.parentElement!;
+        const label = item.querySelector("span");
+        // The FAB carries no label; the colour sits on its own span.
+        const want = getComputedStyle(label ?? item).color;
+        const name = label?.textContent ?? "(the sparkle FAB)";
+
+        // The paint has to come from the shapes, not the <svg>: `color` is
+        // inherited whatever the paths draw with, so reading it off the icon
+        // element would pass even for a hardcoded fill.
+        return [...icon.querySelectorAll("path, circle, rect, polygon, ellipse, line")].flatMap(
+          (shape) =>
+            (["fill", "stroke"] as const)
+              .map((property) => ({
+                name,
+                property,
+                got: getComputedStyle(shape)[property],
+                want,
+              }))
+              // `none` is how an outline icon declines a fill.
+              .filter((row) => row.got !== "none" && row.got !== want),
+        );
+      }),
+    );
+
+    expect(mismatched, "an icon is painting with its own colour, not the token").toEqual([]);
+  });
+
+  /**
+   * The pill is pinned to 288x63 (BottomNav.tsx), so an icon wider than the one
+   * it replaces pushes its siblings out rather than growing the bar — invisible
+   * to the 16/16/16 framing assertion, which only measures the outer box.
+   *
+   * The bound is the pill's border box, not its padding box: the four items
+   * already span 267px inside a 240px padding box, so `px-[24px]` is inert and
+   * `justify-center` centres the row across the full 288px. That is the design
+   * as drawn; what would actually break is an item crossing the rounded edge.
+   * Today there is ~10px of headroom on each side.
+   */
+  test("every icon renders and nothing overflows the pill", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+
+    const report = await page.locator('[data-testid="bottom-nav"]').evaluate((bar) => {
+      const pill = bar.firstElementChild!;
+      const inner = pill.getBoundingClientRect();
+      return {
+        empty: [...bar.querySelectorAll("svg")]
+          .map((icon, index) => ({ index, box: icon.getBoundingClientRect() }))
+          .filter(({ box }) => box.width === 0 || box.height === 0)
+          .map(({ index }) => index),
+        overflowing: [...pill.children]
+          .map((item) => ({
+            text: item.textContent ?? "",
+            box: item.getBoundingClientRect(),
+          }))
+          .filter(({ box }) => box.left < inner.left - 0.5 || box.right > inner.right + 0.5)
+          .map(({ text }) => text),
+      };
+    });
+
+    expect(report.empty, "an icon rendered with no box at all").toEqual([]);
+    expect(report.overflowing, "an item is spilling outside the pill").toEqual([]);
+  });
+
   test("does not change colour on hover", async ({ page, notFound }) => {
     void notFound;
     await page.goto("./");
