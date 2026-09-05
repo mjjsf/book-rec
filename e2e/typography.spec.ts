@@ -1,8 +1,9 @@
 import { expect, test } from "./fixtures";
 
 /**
- * Book-row spacing is specified typographically, not as box gaps: 8px from the
- * baseline of each descriptor line to the cap height of the line below it. The
+ * Book-row spacing is specified typographically, not as box gaps: 9px from the
+ * title's baseline to the author's cap height, then 8px from the author's to
+ * the rating line's. The
  * CSS gets there by pulling each box onto those edges with negative margins
  * derived from the fonts' metrics, so asserting the CSS values would only
  * restate the implementation.
@@ -73,7 +74,7 @@ type Row = {
 };
 
 test.describe("book row typography", () => {
-  test("all four rows measure 8px baseline-to-cap on both pairs", async ({ page, notFound }) => {
+  test("all four rows measure 9px then 8px baseline-to-cap", async ({ page, notFound }) => {
     void notFound;
     await page.goto("./chat/");
     await expect(page.locator("li p.font-serif").first()).toBeVisible();
@@ -85,7 +86,7 @@ test.describe("book row typography", () => {
 
     rows.forEach((row, index) => {
       expect(row.titleToAuthor, `book ${index + 1}: title baseline -> author cap`).toBeCloseTo(
-        8,
+        9,
         0,
       );
       expect(row.authorToRating, `book ${index + 1}: author baseline -> rating cap`).toBeCloseTo(
@@ -95,7 +96,7 @@ test.describe("book row typography", () => {
     });
   });
 
-  test("the gaps around the shelf button are unchanged by the condensing", async ({
+  test("the gaps around the shelf button are what the row's height leaves", async ({
     page,
     notFound,
   }) => {
@@ -107,11 +108,13 @@ test.describe("book row typography", () => {
     const rows: Row[] = await page.evaluate(measure);
     rows.forEach((row, index) => {
       expect(row.ratingToButton, `book ${index + 1}: rating row -> button`).toBeCloseTo(20, 0);
-      // Not a preserved value any more: centring the hairline between the
-      // covers moved it down 5.2px, which necessarily widens this gap. See
-      // the centring test below for the constraint that now sets it.
+      // Derived, not chosen. Centring the hairline between the covers pinned
+      // the row's height to the cover's 105px, so this gap is whatever is left
+      // below the button — and the pixel added above the author line came out
+      // of it, 24.195 -> 23.195. The covers did not move: the pitch assertion
+      // below is what says so.
       expect(row.buttonToRule, `book ${index + 1}: button -> dividing rule`).toBeCloseTo(
-        24.195,
+        23.195,
         1,
       );
     });

@@ -17,7 +17,6 @@ import { Bubble, QuestionBubble } from "./QuestionBubble";
  */
 export function ChatScreen() {
   const { useHistory, setUseHistory } = useAppState();
-  const [refinement, setRefinement] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const books = getResultBooks();
@@ -44,9 +43,6 @@ export function ChatScreen() {
       </div>
 
       <RefineDock
-        value={refinement}
-        onChange={setRefinement}
-        onSubmit={() => setRefinement("")}
         useHistory={useHistory}
         onUseHistoryChange={setUseHistory}
         detailsOpen={detailsOpen}

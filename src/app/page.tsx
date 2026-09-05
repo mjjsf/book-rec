@@ -56,7 +56,6 @@ export default function StartScreen() {
         <div className="flex w-full flex-col gap-[16px]">
           <PromptComposer
             value={prompt}
-            onChange={setPrompt}
             onSubmit={submit}
             onFirstFocus={populateOnce}
             fadeIn={fadeIn}

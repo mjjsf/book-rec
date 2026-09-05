@@ -60,7 +60,16 @@ test.describe("composer", () => {
       .toBeLessThanOrEqual(0);
   });
 
-  test("fills once, so the field stays typeable", async ({ page, notFound }) => {
+  /**
+   * The designed question is content, not input. This used to assert the
+   * opposite — that the field stayed typeable after being filled — which was
+   * right when the field was editable and is exactly the behaviour now removed.
+   *
+   * Typed with `keyboard.type` rather than `fill()`: Playwright refuses to
+   * `fill()` a read-only element, so that would pass without the field ever
+   * having resisted anything.
+   */
+  test("the populated question cannot be edited", async ({ page, notFound }) => {
     void notFound;
     await page.goto("./");
     const composer = page.getByLabel("Describe the book you are looking for");
@@ -68,10 +77,25 @@ test.describe("composer", () => {
     await composer.click();
     await expect(composer).toHaveValue(SAMPLE_QUERY);
 
-    await composer.fill("");
-    await composer.click();
-    await page.waitForTimeout(400);
-    await expect(composer, "refilling would make it impossible to type").toHaveValue("");
+    await expect(composer).toHaveAttribute("readonly", "");
+    await page.keyboard.type("typed over the top");
+    await page.keyboard.press("Backspace");
+    await expect(composer, "the designed question should be untouched").toHaveValue(SAMPLE_QUERY);
+  });
+
+  test("the refine field takes no input", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./chat/");
+    const refine = page.getByLabel("Refine your recommendations");
+
+    await expect(refine).toHaveAttribute("readonly", "");
+    await refine.click();
+    await page.keyboard.type("something else please");
+    await expect(refine).toHaveValue("");
+    await expect(
+      page.getByRole("button", { name: "Send" }),
+      "an empty field means nothing to send",
+    ).toBeDisabled();
   });
 
   /**

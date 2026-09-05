@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   title: "Goodreads AI — Book recommendations",
   description:
     "Describe a mood, genre or subject and get book recommendations, optionally informed by your reading history.",
+  /*
+   * Which commit this HTML was built from. Metadata is evaluated during the
+   * build, so the value is baked into the export rather than read at runtime.
+   *
+   * It exists because "the deploy succeeded" and "the site you just built is
+   * the one being served" are different claims, and nothing could tell them
+   * apart: every other smoke assertion passes on a build from an hour ago.
+   * scripts/smoke.mjs compares this against the commit CI is running for, and
+   * View Source answers the same question by hand.
+   */
+  other: { "build-commit": process.env.BUILD_COMMIT ?? "dev" },
 };
 
 export const viewport: Viewport = {

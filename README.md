@@ -105,6 +105,29 @@ page works": a wrong `basePath` still serves the HTML while every asset 404s.
 The script runs against the local preview by default, so it is also useful
 before pushing.
 
+It also checks **which** build is live. Every build stamps the commit it came
+from into the HTML as `<meta name="build-commit">`, and CI passes the same SHA
+to the smoke job as `EXPECTED_COMMIT`, so a publish that fails to replace what
+is being served turns the run red. Without that, a green smoke run only meant "a
+working site is up" — every other assertion passes just as happily on a build
+from an hour ago.
+
+### "I deployed but the page hasn't changed"
+
+Usually the browser, not the deploy. Pages serves HTML with
+`Cache-Control: max-age=600`, so a page loaded in the last ten minutes is served
+from cache without asking the server at all — and a normal reload does not
+always bypass it.
+
+- Hard-refresh (**Cmd+Shift+R** / **Ctrl+F5**), or add a query string
+  (`…/book-rec/?v=2`), which makes it a different cache entry.
+- To check what is actually deployed, View Source and read
+  `<meta name="build-commit">`, or run `npm run smoke https://mjjsf.github.io/book-rec/`,
+  which prints it.
+
+Pages does not allow custom response headers, so the ten minutes cannot be
+shortened from here.
+
 ## Cover images
 
 Real cover artwork lives in `src/covers/` as 210×315 WebP — three times the
