@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { AssistantControls } from "@/components/AssistantControls";
 import { useAppState } from "@/components/AppStateProvider";
-import { BottomNav } from "@/components/BottomNav";
 import { PromptComposer } from "@/components/PromptComposer";
 import { SAMPLE_QUERY } from "@/lib/designContent";
 
@@ -17,8 +15,8 @@ import { SAMPLE_QUERY } from "@/lib/designContent";
  * transition between the two, so the app plays it rather than skipping to the
  * filled state.
  *
- * The text fades in over ~613ms, and the composer grows 112px to 147px, as the
- * two frames show. Send always leads to the results screen.
+ * The text fades in and the composer grows 112px to 147px together, both over
+ * 300ms. Send always leads to the results screen.
  */
 export default function StartScreen() {
   const router = useRouter();
@@ -38,8 +36,6 @@ export default function StartScreen() {
     populated.current = true;
     setPrompt(SAMPLE_QUERY);
     setFadeIn(true);
-    // Outlives the 613ms animation so the class is never pulled mid-fade.
-    window.setTimeout(() => setFadeIn(false), 700);
   };
 
   const submit = () => {
@@ -50,8 +46,6 @@ export default function StartScreen() {
 
   return (
     <>
-      <AppHeader />
-
       <div className="absolute left-[32px] top-[186px] flex w-[323px] flex-col items-center gap-[32px]">
         <h1 className="text-center font-serif text-headline leading-[1.24] text-black">
           What kind of book
@@ -66,6 +60,7 @@ export default function StartScreen() {
             onSubmit={submit}
             onFirstFocus={populateOnce}
             fadeIn={fadeIn}
+            onFadeEnd={() => setFadeIn(false)}
             label="Describe the book you are looking for"
             minHeight={prompt.length > 0 ? 147 : 112}
             maxHeight={147}
@@ -81,7 +76,6 @@ export default function StartScreen() {
         </div>
       </div>
 
-      <BottomNav />
     </>
   );
 }

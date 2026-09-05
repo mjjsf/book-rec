@@ -24,7 +24,7 @@ test.describe("framing", () => {
     void notFound;
     await page.goto("./");
     const frame = await boxOf(page, ".phone-frame");
-    const nav = await boxOf(page, 'nav[aria-label="Primary"]');
+    const nav = await boxOf(page, '[data-testid="bottom-nav"]');
 
     expect(Math.round(nav.x - frame.x)).toBe(16);
     expect(Math.round(frame.x + frame.width - (nav.x + nav.width))).toBe(16);
@@ -56,7 +56,7 @@ test.describe("framing", () => {
     expect(scrolls, "the device must fit the window").toBe(false);
 
     // The 16px gaps scale with everything else rather than drifting.
-    const nav = await boxOf(page, 'nav[aria-label="Primary"]');
+    const nav = await boxOf(page, '[data-testid="bottom-nav"]');
     expect(nav.x - frame.x).toBeCloseTo(16 * scale, 0);
     expect(frame.y + frame.height - (nav.y + nav.height)).toBeCloseTo(16 * scale, 0);
   });

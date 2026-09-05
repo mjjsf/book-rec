@@ -18,9 +18,13 @@ export function AiDetailsButton({
   return (
     <button
       type="button"
+      // The popover's outside-click handler skips anything inside this
+      // attribute. Without it the card closed on mousedown and this button's
+      // click reopened it in the same gesture, so it looked stuck open.
+      data-ai-details-trigger=""
       onClick={() => onToggle(!open)}
       aria-expanded={open}
-      className="ring-focus flex cursor-pointer items-center gap-[6px] rounded-[6px] text-black transition-colors hover:text-green-500"
+      className="ring-focus flex cursor-pointer items-center gap-[6px] rounded-[6px] text-black"
     >
       <ShieldInfoIcon />
       <span className="text-control leading-none">AI details</span>
@@ -57,7 +61,10 @@ export function AiDetailsPopover({
       if (event.key === "Escape") onClose();
     };
     const onPointerDown = (event: MouseEvent) => {
-      if (!card.current?.contains(event.target as Node)) onClose();
+      const target = event.target as Element | null;
+      // Leave the trigger alone so its own click can toggle the card closed.
+      if (target?.closest?.("[data-ai-details-trigger]")) return;
+      if (!card.current?.contains(target as Node)) onClose();
     };
 
     document.addEventListener("keydown", onKey);

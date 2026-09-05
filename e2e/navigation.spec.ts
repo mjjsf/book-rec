@@ -105,12 +105,119 @@ test.describe("navigation", () => {
     expect(page.url()).toBe(before);
   });
 
-  test("the home indicator does not swallow bottom-nav clicks", async ({ page, notFound }) => {
+  /**
+   * The chrome used to render inside each screen, so the remounting template
+   * took the header and the nav down with the body — and, more to the point,
+   * brought them back at opacity 0 and faded them up with it. The frame went
+   * white for the length of the fade.
+   *
+   * Presence is the wrong thing to sample: React swaps the old subtree for the
+   * new one inside a single commit, so an animation frame never catches a gap.
+   * What it does catch is the chrome being transparent, so this multiplies the
+   * effective opacity down the ancestor chain, every frame, for both.
+   */
+  test("the chrome never fades mid-navigation — no white flash", async ({ page, notFound }) => {
     void notFound;
     await page.goto("./");
-    // "More" is the closest nav item to the indicator.
-    await page.locator('nav a[href*="/more"]').click();
-    await expect(page).toHaveURL(/\/more/);
+
+    await page.evaluate(() => {
+      const w = window as unknown as { __opacity: number[]; __raf: number };
+      w.__opacity = [];
+      const effectiveOpacity = (el: Element | null) => {
+        if (!el) return 0;
+        let value = 1;
+        for (let node: Element | null = el; node; node = node.parentElement) {
+          value *= Number(getComputedStyle(node).opacity);
+        }
+        return value;
+      };
+      const tick = () => {
+        w.__opacity.push(
+          Math.min(
+            effectiveOpacity(document.querySelector("header")),
+            effectiveOpacity(document.querySelector('[data-testid="bottom-nav"]')),
+          ),
+        );
+        w.__raf = requestAnimationFrame(tick);
+      };
+      tick();
+    });
+
+    const composer = page.getByLabel("Describe the book you are looking for");
+    await composer.click();
+    await expect(composer).not.toHaveValue("");
+    await page.getByRole("button", { name: "Send" }).click();
+    await page.waitForURL(/\/chat\//);
+    await expect(page.locator("li p.font-serif").first()).toBeVisible();
+
+    const frames = await page.evaluate(() => {
+      const w = window as unknown as { __opacity: number[]; __raf: number };
+      cancelAnimationFrame(w.__raf);
+      return w.__opacity;
+    });
+
+    expect(frames.length, "should have sampled real frames").toBeGreaterThan(20);
+    expect(
+      Math.min(...frames),
+      "the header or the nav faded with the screen body — is the chrome back inside a page?",
+    ).toBeCloseTo(1, 2);
+  });
+
+  test("the chrome is not inside the element that fades", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./chat/");
+
+    // The structural invariant behind the test above, named directly.
+    expect(
+      await page.evaluate(() => {
+        const fading = document.querySelector(".screen-enter");
+        return [
+          fading?.contains(document.querySelector("header")),
+          fading?.contains(document.querySelector('[data-testid="bottom-nav"]')),
+        ];
+      }),
+    ).toEqual([false, false]);
+  });
+});
+
+/**
+ * The bottom bar is decorative in the prototype: it is drawn, it goes nowhere,
+ * and it does not light up under the cursor. It used to be four `next/link`s
+ * with a green hover, which invited clicks into stub routes.
+ */
+test.describe("bottom nav", () => {
+  for (const path of ["./", "./chat/"]) {
+    test(`is inert on ${path}`, async ({ page, notFound }) => {
+      void notFound;
+      await page.goto(path);
+
+      const nav = page.locator('[data-testid="bottom-nav"]');
+      await expect(nav).toBeVisible();
+      expect(await nav.locator("[href]").count(), "nothing in the bar links anywhere").toBe(0);
+      expect(
+        await nav.locator("a, button, [tabindex]").count(),
+        "a decorative bar should not be tabbable",
+      ).toBe(0);
+
+      const before = page.url();
+      for (const label of ["Home", "My Books", "Discover", "More"]) {
+        await nav.getByText(label, { exact: true }).click({ force: true });
+      }
+      await page.waitForTimeout(300);
+      expect(page.url(), "clicking the bar should go nowhere").toBe(before);
+    });
+  }
+
+  test("does not change colour on hover", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./");
+
+    const item = page.locator('[data-testid="bottom-nav"]').getByText("Home", { exact: true });
+    const colour = () => item.evaluate((el) => getComputedStyle(el).color);
+    const resting = await colour();
+    await item.hover();
+    await page.waitForTimeout(120);
+    expect(await colour(), "the hover colour should be gone").toBe(resting);
   });
 });
 

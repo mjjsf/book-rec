@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BottomNav } from "./BottomNav";
 
 /**
  * The Figma covers the recommendation feature only; the other nav
@@ -18,7 +17,6 @@ export function PlaceholderScreen({ title }: { title: string }) {
           Back to the assistant
         </Link>
       </div>
-      <BottomNav />
     </>
   );
 }
