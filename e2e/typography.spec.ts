@@ -37,8 +37,18 @@ const measure = `(() => {
     const ratingRow = author.nextElementSibling;
     const rating = ratingRow.querySelector("p");
     const button = li.querySelector("div.rounded-shelf");
+    // First 70px-wide graphic in the row: the cover. The star strip's svgs come
+    // later in document order and are narrower.
+    const cover = li.querySelector('svg[width="70"], img[width="70"]');
     const isLast = li === li.parentElement.lastElementChild;
+    const box = li.getBoundingClientRect();
     return {
+      coverTop: cover.getBoundingClientRect().top,
+      coverBottom: cover.getBoundingClientRect().bottom,
+      // The hairline is the row's bottom border, so it occupies the last
+      // device pixel of the border box. The final row draws none.
+      ruleTop: isLast ? null : box.bottom - 1,
+      ruleBottom: isLast ? null : box.bottom,
       titleToAuthor: capTopOf(author) - baselineOf(title),
       authorToRating: capTopOf(rating) - baselineOf(author),
       ratingToButton: button.getBoundingClientRect().top - ratingRow.getBoundingClientRect().bottom,
@@ -52,6 +62,10 @@ const measure = `(() => {
 })()`;
 
 type Row = {
+  coverTop: number;
+  coverBottom: number;
+  ruleTop: number | null;
+  ruleBottom: number | null;
   titleToAuthor: number;
   authorToRating: number;
   ratingToButton: number;
@@ -93,9 +107,66 @@ test.describe("book row typography", () => {
     const rows: Row[] = await page.evaluate(measure);
     rows.forEach((row, index) => {
       expect(row.ratingToButton, `book ${index + 1}: rating row -> button`).toBeCloseTo(20, 0);
-      // This one regressed to 28.4px when the condensed column became shorter
-      // than the 105px cover and the cover started setting the row's height.
-      expect(row.buttonToRule, `book ${index + 1}: button -> dividing rule`).toBeCloseTo(19, 0);
+      // Not a preserved value any more: centring the hairline between the
+      // covers moved it down 5.2px, which necessarily widens this gap. See
+      // the centring test below for the constraint that now sets it.
+      expect(row.buttonToRule, `book ${index + 1}: button -> dividing rule`).toBeCloseTo(
+        24.195,
+        1,
+      );
     });
+  });
+});
+
+/**
+ * The hairline between two books belongs midway between their covers. It used
+ * to sit 10.6px under the cover above and 21px over the cover below, because
+ * its distance from the cover above was never written down anywhere: it was
+ * the row's bottom padding *minus* however far the 105px cover overhung the
+ * text column. Pinning the row's box to the cover's height removes that
+ * dependency, and centring then reduces to "padding-bottom equals list gap".
+ *
+ * Measured as the property itself — two distances that must match — rather
+ * than as the CSS values that produce them.
+ */
+/** Adjacent rows, as [index, row, next] — the rule lives between them. */
+function pairs(rows: Row[]): Array<[number, Row, Row]> {
+  return rows
+    .slice(0, -1)
+    .map((row, index) => [index, row, rows[index + 1]!] as [number, Row, Row]);
+}
+
+test.describe("book row rhythm", () => {
+  test("the rule sits midway between the covers it divides", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./chat/");
+    await expect(page.locator("li p.font-serif").first()).toBeVisible();
+    await page.evaluate(() => document.fonts.ready.then(() => true));
+
+    const rows: Row[] = await page.evaluate(measure);
+    expect(rows.length).toBeGreaterThan(1);
+
+    for (const [index, row, next] of pairs(rows)) {
+      const above = row.ruleTop! - row.coverBottom;
+      const below = next.coverTop - row.ruleBottom!;
+      expect(
+        above,
+        `rule ${index + 1}: ${above.toFixed(2)}px above vs ${below.toFixed(2)}px below`,
+      ).toBeCloseTo(below, 1);
+    }
+  });
+
+  test("centring the rule left the covers where they were", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./chat/");
+    await expect(page.locator("li p.font-serif").first()).toBeVisible();
+    await page.evaluate(() => document.fonts.ready.then(() => true));
+
+    // The rule was to move, not the books. Row pitch is what makes that
+    // claim checkable rather than assumed.
+    const rows: Row[] = await page.evaluate(measure);
+    for (const [index, row, next] of pairs(rows)) {
+      expect(next.coverTop - row.coverTop, `pitch below book ${index + 1}`).toBeCloseTo(137.61, 1);
+    }
   });
 });
