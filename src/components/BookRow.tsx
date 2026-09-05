@@ -43,7 +43,16 @@ export function BookRow({ book }: { book: Book }) {
             <p className="trim-serif trim-bottom font-serif text-title leading-[19.301px] text-black">
               {book.title}
             </p>
-            <p className="trim-sans trim-both text-meta leading-[19.301px] text-byline">
+            {/*
+              * The extra pixel above the author line is padding, not margin:
+              * `trim-both` works by setting a negative margin-top, and a margin
+              * utility here would replace that value and undo the trim. Padding
+              * moves the text down inside its own box while the trim keeps
+              * doing its job, and the box grows by 1px so the rating line and
+              * the shelf button shift down with it — which keeps every gap
+              * below this one at its measured value.
+              */}
+            <p className="trim-sans trim-both pt-[1px] text-meta leading-[19.301px] text-byline">
               by {book.author}
             </p>
             <div className="trim-sans flex items-center gap-[6px]">
