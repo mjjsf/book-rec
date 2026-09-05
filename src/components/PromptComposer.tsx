@@ -13,7 +13,6 @@ import { SendIcon } from "./icons";
  */
 export function PromptComposer({
   value,
-  onChange,
   onSubmit,
   disabled = false,
   minHeight = 112,
@@ -26,7 +25,6 @@ export function PromptComposer({
   onFadeEnd,
 }: {
   value: string;
-  onChange: (next: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
   minHeight?: number;
@@ -84,7 +82,6 @@ export function PromptComposer({
         disabled={disabled}
         aria-label={label}
         placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
         onFocus={() => {
           if (focusedOnce.current) return;
           focusedOnce.current = true;
@@ -96,7 +93,13 @@ export function PromptComposer({
             if (canSend) onSubmit();
           }
         }}
-        className={`w-full flex-1 resize-none border-0 bg-transparent pr-[6px] text-control leading-[17px] text-black outline-none placeholder:text-placeholder disabled:opacity-60 ${
+        // The prototype's text is designed, not typed. `readOnly` rather than
+        // `disabled` so the field still takes focus — that is what plays the
+        // fill-on-click beat on Start — and keeps its normal colour. The caret
+        // goes too: a cursor blinking in a field that ignores typing promises
+        // something this screen cannot deliver.
+        readOnly
+        className={`w-full flex-1 resize-none border-0 bg-transparent pr-[6px] text-control leading-[17px] text-black caret-transparent outline-none placeholder:text-placeholder disabled:opacity-60 ${
           fadeIn ? "animate-fade-in" : ""
         }`}
         rows={1}

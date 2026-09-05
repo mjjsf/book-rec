@@ -17,17 +17,11 @@ import { PromptComposer } from "./PromptComposer";
  * composer happens to be.
  */
 export function RefineDock({
-  value,
-  onChange,
-  onSubmit,
   useHistory,
   onUseHistoryChange,
   detailsOpen,
   onDetailsToggle,
 }: {
-  value: string;
-  onChange: (next: string) => void;
-  onSubmit: () => void;
   useHistory: boolean;
   onUseHistoryChange: (next: boolean) => void;
   detailsOpen: boolean;
@@ -48,9 +42,11 @@ export function RefineDock({
           */}
         <div className="relative">
           <PromptComposer
-            value={value}
-            onChange={onChange}
-            onSubmit={onSubmit}
+            // Nothing to plumb: the field takes no input, so its value is
+            // always empty and Send stays disabled by the composer's own
+            // `canSend` check. A submit handler here would never fire.
+            value=""
+            onSubmit={() => {}}
             label="Refine your recommendations"
             minHeight={95}
             maxHeight={95}
