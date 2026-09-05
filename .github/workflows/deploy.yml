@@ -39,6 +39,20 @@ jobs:
       - name: Assert Jekyll is disabled
         run: test -f out/.nojekyll
 
+      # Browser checks run against the real export under its base path, and
+      # they gate the deploy: `deploy` needs this job, so a build whose UI is
+      # broken never reaches Pages. Each spec here exists because that bug
+      # actually shipped once.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
       - uses: actions/upload-pages-artifact@v3
         # Only the run that can deploy needs to publish the artifact.
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
