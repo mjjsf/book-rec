@@ -28,6 +28,33 @@ test.describe("results screen", () => {
     }
   });
 
+  /**
+   * Covers come from `npm run covers`, which writes the WebP files *and*
+   * regenerates the static imports in src/covers/index.ts. Regenerate one
+   * without the other and the rows silently fall back to the generated
+   * two-tone art — the page still renders, so nothing else would notice.
+   */
+  test("every row shows real cover art, not the generated fallback", async ({
+    page,
+    notFound,
+  }) => {
+    void notFound;
+    await page.goto("./chat/");
+
+    const covers = page.locator('li img[width="70"]');
+    await expect(covers).toHaveCount(DESIGNED_TITLES.length);
+    // Decoded, not merely present: a broken src still yields an <img>.
+    for (let index = 0; index < DESIGNED_TITLES.length; index += 1) {
+      expect(
+        await covers.nth(index).evaluate((el) => (el as HTMLImageElement).naturalWidth),
+        `cover ${index + 1} did not load`,
+      ).toBeGreaterThan(0);
+    }
+    await expect(page.locator('li svg[width="70"]'), "generated art is still showing").toHaveCount(
+      0,
+    );
+  });
+
   test("is present in the served HTML, not only after hydration", async ({ request }) => {
     // The empty-shell bug was invisible in a browser: hydration filled it in.
     const response = await request.get("./chat/");

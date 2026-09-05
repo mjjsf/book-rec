@@ -71,13 +71,25 @@ async function main() {
       .webp({ quality: QUALITY })
       .toFile(to);
 
-    written.push({ id, source, from: `${width}x${height}` });
+    written.push({
+      id,
+      source,
+      from: `${width}x${height}`,
+      // sharp upscales without complaint, so an undersized source turns into a
+      // soft cover that nothing else in the pipeline would flag.
+      undersized: width < WIDTH || height < HEIGHT,
+    });
   }
 
   await writeIndex(written.map((w) => w.id));
 
-  for (const { id, source, from } of written) {
+  for (const { id, source, from, undersized } of written) {
     console.log(`  ok    ${id}  ${source} (${from}) -> ${WIDTH}x${HEIGHT} webp`);
+    if (undersized) {
+      console.log(
+        `        note: source is smaller than ${WIDTH}x${HEIGHT} and was upscaled — expect it to look soft`,
+      );
+    }
   }
   for (const id of missing) {
     console.log(`  skip  ${id}  no source found in assets/covers-src/`);

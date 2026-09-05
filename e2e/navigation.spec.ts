@@ -64,12 +64,35 @@ test.describe("navigation", () => {
     await composer.click();
     await expect(composer).not.toHaveValue("");
 
-    await page.getByRole("button", { name: "Send" }).click();
-    const opacity = await page
-      .locator(".screen-enter")
-      .evaluate((el) => Number(getComputedStyle(el).opacity));
-    expect(opacity, "should start transparent").toBeLessThan(1);
+    // Sampled in-page rather than by reading one value after the click: a
+    // single round-trip is racing a 300ms window, and it loses that race under
+    // load. The sampler cannot miss the fade, so this asserts the same thing
+    // without depending on how fast the driver gets its question in.
+    await page.evaluate(() => {
+      const w = window as unknown as { __fade: number[]; __raf: number };
+      w.__fade = [];
+      const tick = () => {
+        const screens = [...document.querySelectorAll(".screen-enter")];
+        if (screens.length > 0) {
+          w.__fade.push(Math.min(...screens.map((el) => Number(getComputedStyle(el).opacity))));
+        }
+        w.__raf = requestAnimationFrame(tick);
+      };
+      tick();
+    });
 
+    await page.getByRole("button", { name: "Send" }).click();
+    await page.waitForURL(/\/chat\//);
+    await expect(page.locator("li p.font-serif").first()).toBeVisible();
+
+    const fade = await page.evaluate(() => {
+      const w = window as unknown as { __fade: number[]; __raf: number };
+      cancelAnimationFrame(w.__raf);
+      return w.__fade;
+    });
+
+    expect(fade.length, "should have sampled real frames").toBeGreaterThan(20);
+    expect(Math.min(...fade), "the new screen should start transparent").toBeLessThan(0.5);
     await expect
       .poll(() =>
         page.locator(".screen-enter").evaluate((el) => Number(getComputedStyle(el).opacity)),
