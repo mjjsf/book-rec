@@ -123,22 +123,6 @@ body {
 }
 
 /*
- * The home indicator. It sits over the app's own bottom nav, so it must never
- * take a click — the nav is 16px from the bottom and genuinely interactive.
- */
-.device-indicator {
-  position: absolute;
-  bottom: calc(var(--bezel) + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 134px;
-  height: 5px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.28);
-  pointer-events: none;
-}
-
-/*
  * The Figma frames are all 393x852. The screen keeps exactly that content box
  * — every absolute coordinate in the app is measured against it — and only the
  * corners are rounded to sit inside the bezel.
