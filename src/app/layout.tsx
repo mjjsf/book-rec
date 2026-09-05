@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Goodreads AI — Book recommendations",
+  title: "AI book recommendations",
   description:
     "Describe a mood, genre or subject and get book recommendations, optionally informed by your reading history.",
   /*
