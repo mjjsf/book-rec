@@ -36,8 +36,6 @@ export default function StartScreen() {
     populated.current = true;
     setPrompt(SAMPLE_QUERY);
     setFadeIn(true);
-    // Just past the 300ms animation, so the class is never pulled mid-fade.
-    window.setTimeout(() => setFadeIn(false), 380);
   };
 
   const submit = () => {
@@ -62,6 +60,7 @@ export default function StartScreen() {
             onSubmit={submit}
             onFirstFocus={populateOnce}
             fadeIn={fadeIn}
+            onFadeEnd={() => setFadeIn(false)}
             label="Describe the book you are looking for"
             minHeight={prompt.length > 0 ? 147 : 112}
             maxHeight={147}

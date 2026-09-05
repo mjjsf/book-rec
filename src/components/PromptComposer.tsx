@@ -23,6 +23,7 @@ export function PromptComposer({
   autoFocus = false,
   onFirstFocus,
   fadeIn = false,
+  onFadeEnd,
 }: {
   value: string;
   onChange: (next: string) => void;
@@ -41,6 +42,12 @@ export function PromptComposer({
   onFirstFocus?: () => void;
   /** Fade the text in, for the moment it is filled programmatically. */
   fadeIn?: boolean;
+  /**
+   * Fired when that fade finishes, so the caller can drop the class on the
+   * frame it actually ends rather than guessing a duration that then has to be
+   * kept in step with the motion token by hand.
+   */
+  onFadeEnd?: () => void;
 }) {
   const textarea = useRef<HTMLTextAreaElement>(null);
   const focusedOnce = useRef(false);
@@ -67,7 +74,7 @@ export function PromptComposer({
        * 147px box and clip the last line of the six-line question — the same
        * trap .phone-frame hit. Figma's stroke does not consume layout either.
        */
-      className="flex w-full flex-col rounded-composer bg-white shadow-[inset_0_0_0_1px_var(--color-field-border)] pt-[16px] pr-[10px] pb-[8px] pl-[16px] transition-[min-height] duration-300 ease-out"
+      className="flex w-full flex-col rounded-composer bg-white shadow-[inset_0_0_0_1px_var(--color-field-border)] pt-[16px] pr-[10px] pb-[8px] pl-[16px] transition-[min-height] duration-[var(--motion)] ease-out"
       style={{ minHeight }}
     >
       <textarea
@@ -93,6 +100,7 @@ export function PromptComposer({
           fadeIn ? "animate-fade-in" : ""
         }`}
         rows={1}
+        onAnimationEnd={onFadeEnd}
       />
       <div className="flex justify-end">
         <button

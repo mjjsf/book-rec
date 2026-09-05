@@ -115,17 +115,25 @@ test.describe("composer", () => {
     await page.goto("./");
 
     await page.evaluate(() => {
-      const w = window as unknown as { __start: number | null; __done: number | null };
+      const w = window as unknown as {
+        __start: number | null;
+        __faded: boolean;
+        __done: number | null;
+      };
       w.__start = null;
+      w.__faded = false;
       w.__done = null;
       const box = document.querySelector("div.rounded-composer")!;
       const field = document.querySelector("textarea")!;
+      // Computed opacity rounds to 1 well before an ease-out finishes, so the
+      // fade's end has to come from the event, not from sampling the value.
+      field.addEventListener("animationend", () => {
+        w.__faded = true;
+      });
       const tick = () => {
         // The fill lands first; time everything from the frame it appears on.
         if (w.__start === null && field.value.length > 0) w.__start = performance.now();
-        const settled =
-          Math.round(box.getBoundingClientRect().height) === 147 &&
-          Number(getComputedStyle(field).opacity) === 1;
+        const settled = Math.round(box.getBoundingClientRect().height) === 147 && w.__faded;
         if (w.__start !== null && settled) {
           w.__done = performance.now();
           return;

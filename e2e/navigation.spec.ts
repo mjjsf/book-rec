@@ -107,31 +107,36 @@ test.describe("navigation", () => {
 
   /**
    * The chrome used to render inside each screen, so the remounting template
-   * took the header and the nav down with the body: the frame went white for a
-   * frame or two on every navigation. Sampling one before and one after would
-   * pass — the flash only exists in between.
+   * took the header and the nav down with the body — and, more to the point,
+   * brought them back at opacity 0 and faded them up with it. The frame went
+   * white for the length of the fade.
+   *
+   * Presence is the wrong thing to sample: React swaps the old subtree for the
+   * new one inside a single commit, so an animation frame never catches a gap.
+   * What it does catch is the chrome being transparent, so this multiplies the
+   * effective opacity down the ancestor chain, every frame, for both.
    */
-  test("the chrome never disappears mid-navigation — no white flash", async ({
-    page,
-    notFound,
-  }) => {
+  test("the chrome never fades mid-navigation — no white flash", async ({ page, notFound }) => {
     void notFound;
     await page.goto("./");
 
     await page.evaluate(() => {
-      const w = window as unknown as { __chrome: string[]; __raf: number };
-      w.__chrome = [];
-      const area = (el: Element | null) => {
+      const w = window as unknown as { __opacity: number[]; __raf: number };
+      w.__opacity = [];
+      const effectiveOpacity = (el: Element | null) => {
         if (!el) return 0;
-        const r = el.getBoundingClientRect();
-        return Math.round(r.width * r.height);
+        let value = 1;
+        for (let node: Element | null = el; node; node = node.parentElement) {
+          value *= Number(getComputedStyle(node).opacity);
+        }
+        return value;
       };
       const tick = () => {
-        w.__chrome.push(
-          [
-            area(document.querySelector("header")),
-            area(document.querySelector('[data-testid="bottom-nav"]')),
-          ].join("/"),
+        w.__opacity.push(
+          Math.min(
+            effectiveOpacity(document.querySelector("header")),
+            effectiveOpacity(document.querySelector('[data-testid="bottom-nav"]')),
+          ),
         );
         w.__raf = requestAnimationFrame(tick);
       };
@@ -146,14 +151,32 @@ test.describe("navigation", () => {
     await expect(page.locator("li p.font-serif").first()).toBeVisible();
 
     const frames = await page.evaluate(() => {
-      const w = window as unknown as { __chrome: string[]; __raf: number };
+      const w = window as unknown as { __opacity: number[]; __raf: number };
       cancelAnimationFrame(w.__raf);
-      return w.__chrome;
+      return w.__opacity;
     });
 
     expect(frames.length, "should have sampled real frames").toBeGreaterThan(20);
-    const blank = frames.filter((f) => f.split("/").some((n) => Number(n) === 0));
-    expect(blank, "the header or the nav vanished during the fade").toEqual([]);
+    expect(
+      Math.min(...frames),
+      "the header or the nav faded with the screen body — is the chrome back inside a page?",
+    ).toBeCloseTo(1, 2);
+  });
+
+  test("the chrome is not inside the element that fades", async ({ page, notFound }) => {
+    void notFound;
+    await page.goto("./chat/");
+
+    // The structural invariant behind the test above, named directly.
+    expect(
+      await page.evaluate(() => {
+        const fading = document.querySelector(".screen-enter");
+        return [
+          fading?.contains(document.querySelector("header")),
+          fading?.contains(document.querySelector('[data-testid="bottom-nav"]')),
+        ];
+      }),
+    ).toEqual([false, false]);
   });
 });
 
