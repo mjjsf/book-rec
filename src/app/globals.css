@@ -177,6 +177,32 @@ body {
   animation: fade-in 350ms ease-out;
 }
 
+/*
+ * The composer's fill-on-click beat, deliberately slower than the card above:
+ * 350ms x 1.75 = 612.5, rounded. Kept as its own class so changing one does not
+ * silently change the other.
+ */
+.animate-fade-in-slow {
+  animation: fade-in 613ms ease-out;
+}
+
+/*
+ * Screen-to-screen transition. app/template.tsx remounts this on every
+ * navigation, so the new screen fades up while the device frame — which lives
+ * in the layout and is never remounted — does not move at all.
+ */
+.screen-enter {
+  animation: fade-in 250ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-slow,
+  .screen-enter {
+    animation: none;
+  }
+}
+
 /* Native-feeling scroll areas without visible desktop scrollbars. */
 .scroll-area {
   overflow-y: auto;

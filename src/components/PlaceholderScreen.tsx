@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BottomNav } from "./BottomNav";
-import { PhoneFrame } from "./PhoneFrame";
 
 /**
  * The Figma covers the recommendation feature only; the other nav
@@ -8,7 +7,7 @@ import { PhoneFrame } from "./PhoneFrame";
  */
 export function PlaceholderScreen({ title }: { title: string }) {
   return (
-    <PhoneFrame>
+    <>
       <div className="absolute inset-x-0 top-0 h-[102px] bg-header-sand" />
       <div className="absolute inset-x-[32px] top-[186px] flex flex-col items-center gap-[16px] text-center">
         <h1 className="font-serif text-headline leading-[1.24] text-black">{title}</h1>
@@ -20,6 +19,6 @@ export function PlaceholderScreen({ title }: { title: string }) {
         </Link>
       </div>
       <BottomNav />
-    </PhoneFrame>
+    </>
   );
 }
