@@ -29,12 +29,21 @@ npm run dev      # http://localhost:3000
 | `npm run check:static` | Fail if any server-only code crept in |
 | `npm run smoke` | Fetch a deployed build and check it actually works |
 | `npm run test` | Vitest suites for the catalog and the designed copy |
+| `npm run test:e2e` | Playwright browser checks (needs `npm run build` first) |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
 
 There is no `npm start`: `next start` refuses to run against `output: "export"`.
 Use `npm run build && npm run preview`, which serves the real export under the
 real base path — base-path bugs are invisible at the root.
+
+`npm run test:e2e` drives that same export with Playwright and starts the
+preview server itself. The suite in `e2e/` guards the things unit tests cannot
+see, and each spec exists because that bug once shipped: the device frame
+resizing mid-navigation, the composer clipping the last line of the designed
+question, a page serving as an empty shell before hydration, the AI-details card
+landing outside the frame, and assets losing the base path. It runs on every
+pull request and gates the deploy.
 
 `npm run dev` serves the app under the deployed base path, so it is at
 **http://localhost:3000/book-rec** rather than the bare root.
