@@ -14,16 +14,20 @@ export function BookRow({ book }: { book: Book }) {
   const { shelves, setShelf } = useAppState();
 
   return (
-    <li className="flex flex-col gap-[19px] border-b border-hairline pb-[19px] last:border-b-0">
+    <li className="border-b border-hairline pb-[var(--row-split)] last:border-b-0">
       {/*
-        * The cover is positioned rather than laid out so the row's height comes
-        * from the text column alone. Condensing the descriptor lines made that
-        * column shorter than the 105px cover, and a cover-driven height would
-        * have pushed the hairline 8.4px further from the shelf button than the
-        * 19px padding says. The 90px inset is the cover's 70px plus its 20px
-        * gap, so the column lands exactly where the flex row put it.
+        * The cover is positioned rather than laid out, and the box is pinned to
+        * its 105px height. Condensing the descriptor lines left the text column
+        * at 96.61px, so a laid-out cover would have set the row's height while
+        * the box ended 8.39px short of the cover's bottom edge — which is why
+        * the hairline's distance from the cover above it was never a number
+        * anyone wrote down. With the two edges coincident, centring the hairline
+        * is just `pb == the list's gap` (see ResultsList).
+        *
+        * The 90px inset is the cover's 70px plus its 20px gap, so the column
+        * lands exactly where the flex row put it.
         */}
-      <div className="relative pl-[90px]">
+      <div className="relative min-h-[105px] pl-[90px]">
         <BookCover book={book} width={70} height={105} className="absolute left-0 top-0" />
 
         <div className="flex w-[244.468px] flex-col gap-[20px]">
