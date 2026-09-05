@@ -4,7 +4,6 @@ import { Suspense, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { useAppState } from "@/components/AppStateProvider";
 import { BottomNav } from "@/components/BottomNav";
-import { PhoneFrame } from "@/components/PhoneFrame";
 import { RefineDock } from "@/components/RefineDock";
 import { ResultsList } from "@/components/ResultsList";
 import { RATIONALE, SAMPLE_QUERY, getResultBooks } from "@/lib/designContent";
@@ -26,7 +25,7 @@ export function ChatScreen() {
   const books = getResultBooks();
 
   return (
-    <PhoneFrame>
+    <>
       <AppHeader />
 
       <div className="scroll-area absolute inset-x-0 top-[102px] bottom-[285px] px-[16px] pt-[32px] pb-[24px]">
@@ -59,6 +58,6 @@ export function ChatScreen() {
       />
 
       <BottomNav />
-    </PhoneFrame>
+    </>
   );
 }

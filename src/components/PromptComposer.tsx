@@ -90,7 +90,7 @@ export function PromptComposer({
           }
         }}
         className={`w-full flex-1 resize-none border-0 bg-transparent pr-[6px] text-control leading-[17px] text-black outline-none placeholder:text-placeholder disabled:opacity-60 ${
-          fadeIn ? "animate-fade-in" : ""
+          fadeIn ? "animate-fade-in-slow" : ""
         }`}
         rows={1}
       />

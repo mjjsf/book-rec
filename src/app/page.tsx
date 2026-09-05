@@ -6,7 +6,6 @@ import { AppHeader } from "@/components/AppHeader";
 import { AssistantControls } from "@/components/AssistantControls";
 import { useAppState } from "@/components/AppStateProvider";
 import { BottomNav } from "@/components/BottomNav";
-import { PhoneFrame } from "@/components/PhoneFrame";
 import { PromptComposer } from "@/components/PromptComposer";
 import { SAMPLE_QUERY } from "@/lib/designContent";
 
@@ -18,7 +17,7 @@ import { SAMPLE_QUERY } from "@/lib/designContent";
  * transition between the two, so the app plays it rather than skipping to the
  * filled state.
  *
- * The text fades in over ~350ms, and the composer grows 112px to 147px, as the
+ * The text fades in over ~613ms, and the composer grows 112px to 147px, as the
  * two frames show. Send always leads to the results screen.
  */
 export default function StartScreen() {
@@ -39,17 +38,18 @@ export default function StartScreen() {
     populated.current = true;
     setPrompt(SAMPLE_QUERY);
     setFadeIn(true);
-    window.setTimeout(() => setFadeIn(false), 400);
+    // Outlives the 613ms animation so the class is never pulled mid-fade.
+    window.setTimeout(() => setFadeIn(false), 700);
   };
 
   const submit = () => {
     const trimmed = prompt.trim();
     if (trimmed.length === 0) return;
-    router.push(`/chat?q=${encodeURIComponent(trimmed)}`);
+    router.push(`/chat/?q=${encodeURIComponent(trimmed)}`);
   };
 
   return (
-    <PhoneFrame>
+    <>
       <AppHeader />
 
       <div className="absolute left-[32px] top-[186px] flex w-[323px] flex-col items-center gap-[32px]">
@@ -82,6 +82,6 @@ export default function StartScreen() {
       </div>
 
       <BottomNav />
-    </PhoneFrame>
+    </>
   );
 }
