@@ -35,6 +35,11 @@ jobs:
       - run: npm run check:static
 
       - run: npm run build
+        env:
+          # Stamped into the exported HTML so the smoke job can prove the site
+          # it fetches is the one this run built. Explicit rather than reading
+          # Actions' implicit GITHUB_SHA, so the wiring is visible here.
+          BUILD_COMMIT: ${{ github.sha }}
 
       - name: Assert Jekyll is disabled
         run: test -f out/.nojekyll
@@ -100,3 +105,7 @@ jobs:
       - run: npm run smoke
         env:
           SMOKE_URL: ${{ needs.deploy.outputs.page_url }}
+          # Same SHA the build stamped in. A mismatch means the publish did not
+          # replace what is being served, which every other assertion here
+          # would sail straight past.
+          EXPECTED_COMMIT: ${{ github.sha }}

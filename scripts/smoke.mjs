@@ -6,9 +6,17 @@
  *   npm run smoke https://host/book-rec/   # against a real deployment
  *
  * CI runs this after deploy-pages, because "the artifact uploaded" is not the
- * same claim as "the page loads". The assertion that earns its keep is the
- * asset fetch: a wrong basePath still serves the HTML at the right URL while
- * every /_next/ file 404s, which looks green everywhere else.
+ * same claim as "the page loads". Two assertions earn their keep.
+ *
+ * The asset fetch: a wrong basePath still serves the HTML at the right URL
+ * while every /_next/ file 404s, which looks green everywhere else.
+ *
+ * And the build commit. Everything else here passes just as happily on a build
+ * from an hour ago, so a green run used to mean "a working site is up" rather
+ * than "the site you just built is up" — which is the question someone actually
+ * asks after a deploy. With EXPECTED_COMMIT set (CI passes the SHA it is
+ * running for), a stale publish fails. Without it, the commit is reported, so
+ * running this by hand answers "what is live right now?".
  *
  * Node builtins only, so the CI job needs no install.
  */
@@ -73,7 +81,21 @@ async function main() {
 
   const html = await home.text();
 
-  /* 2-3. it is the app, in its designed empty state */
+  /* 2. which build is this? */
+  const stamped = html.match(/<meta name="build-commit" content="([^"]*)"/)?.[1];
+  if (!stamped) {
+    fail("no build-commit meta tag — this build cannot say which commit it came from");
+  }
+  const expected = process.env.EXPECTED_COMMIT;
+  if (expected && stamped !== expected) {
+    fail(
+      `the deployed build is ${stamped}, but this run built ${expected}. ` +
+        "The publish did not replace what is being served.",
+    );
+  }
+  pass(expected ? `serving the commit this run built (${stamped})` : `serving commit ${stamped}`);
+
+  /* 3-4. it is the app, in its designed empty state */
   if (!html.includes("What kind of book")) {
     fail("the Start headline is missing — the page responded but did not render the app");
   }
